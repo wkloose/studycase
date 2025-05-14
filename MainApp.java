@@ -1,9 +1,8 @@
-import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.*;
 
 public class MainApp extends JFrame {
     private CardLayout cardLayout;
@@ -72,25 +71,21 @@ public class MainApp extends JFrame {
             String naik = (String) cbNaik.getSelectedItem();
             String turun = (String) cbTurun.getSelectedItem();
 
-            // Validasi data kosong
             if (nama.isEmpty() || nik.isEmpty() || hp.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Lengkapi semua data!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            // Validasi nama tidak boleh mengandung angka
             if (containsDigit(nama)) {
                 JOptionPane.showMessageDialog(this, "Nama tidak boleh mengandung angka!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            // Validasi NIK harus angka
             if (!isNumeric(nik)) {
                 JOptionPane.showMessageDialog(this, "NIK hanya boleh berisi angka!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
 
-            // Validasi No HP harus angka
             if (!isNumeric(hp)) {
                 JOptionPane.showMessageDialog(this, "No HP hanya boleh berisi angka!", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -127,7 +122,6 @@ public class MainApp extends JFrame {
         panelForm.add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    // Update status kursi berdasarkan trayek yang ingin dipesan
     private void updateKursiStatus(String naik, String turun) {
         for (int i = 0; i < kursiList.length; i++) {
             String kursi = kursiList[i];
@@ -223,7 +217,6 @@ public class MainApp extends JFrame {
         seatsPanel.add(leftSeats);
         seatsPanel.add(rightSeats);
 
-        // Panel info di bawah kursi
         JPanel infoPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
         infoPanel.add(new JLabel("Keterangan: "));
 
@@ -309,13 +302,10 @@ public class MainApp extends JFrame {
         JButton btn = new JButton(kursi);
         btn.setPreferredSize(new Dimension(60, 30));
         btn.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-
-        // Warna kursi akan diupdate saat memilih trayek
         btn.setBackground(Color.GREEN);
 
         btn.addActionListener(e -> {
             if (btn.getBackground() == Color.RED) {
-                // Tambahkan detail informasi kursi yang sudah terisi
                 String info = getKursiInfo(kursi);
                 JOptionPane.showMessageDialog(this,
                         "Kursi " + kursi + " sudah terisi atau tidak tersedia:\n" + info,
@@ -336,7 +326,6 @@ public class MainApp extends JFrame {
         return btn;
     }
 
-    // Mendapatkan informasi detail kursi untuk ditampilkan
     private String getKursiInfo(String kursi) {
         StringBuilder info = new StringBuilder();
         boolean kursiFound = false;
@@ -353,7 +342,6 @@ public class MainApp extends JFrame {
             }
         }
 
-        // Jika kursi terisi karena konflik trayek
         if (!kursiFound) {
             Penumpang p = passengers[0];
             info.append("Konflik dengan trayek: ")
@@ -386,51 +374,29 @@ public class MainApp extends JFrame {
         return -1;
     }
 
-    /**
-     * Cek apakah trayek yang ingin dipesan overlap dengan
-     * trayek yang sudah ada pada kursi tersebut
-     */
     private boolean isKursiTersediaUntukTrayek(String kursi, String naik, String turun) {
         naik = naik.toLowerCase();
         turun = turun.toLowerCase();
 
-        // Mengkonversi nama kota menjadi nilai numerik untuk membandingkan posisi
         int naikPos = getKotaPosition(naik);
         int turunPos = getKotaPosition(turun);
 
-        // Cek apakah arah perjalanan dari barat ke timur atau timur ke barat
         boolean isPerjalananBaratKeTimur = naikPos < turunPos;
 
-        // Cek semua tiket yang sudah ada
         for (int i = 0; i < tiketCount; i++) {
             Tiket t = tiketList[i];
             if (t.getKursi().equals(kursi)) {
                 int tNaikPos = getKotaPosition(t.getNaik().toLowerCase());
                 int tTurunPos = getKotaPosition(t.getTurun().toLowerCase());
 
-                // Cek arah perjalanan tiket yang sudah ada
                 boolean isTiketBaratKeTimur = tNaikPos < tTurunPos;
 
-                // Jika arah perjalanan berbeda, maka tidak ada konflik
-                // Contoh: Ngawi → Solo vs Solo → Ngawi
                 if (isPerjalananBaratKeTimur != isTiketBaratKeTimur) {
-                    continue; // Tidak ada konflik jika arah berbeda
+                    continue;
                 }
-
-                // Jika arah perjalanan sama, cek overlap trayek
-
-                // Verifikasi perjalanan dengan arah yang sama
-
-                // Kasus 1: Naik di tengah-tengah perjalanan yang ada
                 if (naikPos > tNaikPos && naikPos < tTurunPos) return false;
-
-                // Kasus 2: Turun di tengah-tengah perjalanan yang ada
                 if (turunPos > tNaikPos && turunPos < tTurunPos) return false;
-
-                // Kasus 3: Perjalanan baru mencakup perjalanan yang ada
                 if (naikPos <= tNaikPos && turunPos >= tTurunPos) return false;
-
-                // Kasus 4: Perjalanan yang ada mencakup perjalanan baru
                 if (naikPos >= tNaikPos && turunPos <= tTurunPos) return false;
             }
         }
@@ -438,12 +404,7 @@ public class MainApp extends JFrame {
         return true;
     }
 
-    /**
-     * Mengkonversi nama kota menjadi posisi numerik
-     * untuk mengecek overlap pada rute
-     */
     private int getKotaPosition(String kota) {
-        // Urutan kota dari barat ke timur untuk logika pengecekan overlap
         String[] urutanKota = {"wilangan", "ngawi", "gendingan", "solo", "kartosuro", "jogja", "magelang"};
 
         for (int i = 0; i < urutanKota.length; i++) {
@@ -500,9 +461,6 @@ public class MainApp extends JFrame {
         return true;
     }
 
-    /**
-     * Memeriksa apakah string mengandung angka
-     */
     private boolean containsDigit(String str) {
         if (str == null || str.isEmpty()) {
             return false;
